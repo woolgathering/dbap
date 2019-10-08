@@ -1,0 +1,26 @@
+class:: DBAP
+summary:: Distance-based ampltide panning
+related:: TODO
+categories:: UGens>TODO
+
+description::
+
+Distance-based ampltide panning
+
+
+classmethods::
+
+method::ar, kr
+
+argument::TODO
+
+argument::TODO
+
+
+examples::
+
+code::
+
+{ DBAP.ar(/* TODO */) }.play
+
+::
