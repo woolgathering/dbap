@@ -2,12 +2,14 @@
 
 Author: Jacob Sundstrom
 
-Distance-based ampltide panning
+__This is pre-alpha and should NOT be deployed in the field!__ It is in a highly experimental stage.
+Distance-based ampltide panning (DBAP).
 
 ### Requirements
 
 - CMake >= 3.5
 - SuperCollider source code
+- Boost
 
 ### Building
 
