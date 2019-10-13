@@ -84,7 +84,7 @@ DBAP::DBAP() {
   blur = in0(5);
   bg::set<0>(realSourcePos, in0(1));
   bg::set<1>(realSourcePos, in0(2));
-  sourcePos = &realSourcePos; // use an address
+  sourcePtr = &realSourcePos; // use an address
   getDists();
 
 
@@ -122,9 +122,8 @@ void DBAP::calcK() {
 void DBAP::getDists() {
   for(int i=0; i<numSpeakers; i++) {
     float xDiff, yDiff;
-
-    xDiff = (float) pow(getX(speakers[i].pos) - getX(*sourcePos), 2);
-    yDiff = (float) pow(getY(speakers[i].pos) - getY(*sourcePos), 2);
+    xDiff = (float) pow(getX(speakers[i].pos) - getX(*sourcePtr), 2);
+    yDiff = (float) pow(getY(speakers[i].pos) - getY(*sourcePtr), 2);
     speakers[i].dist = sqrt(xDiff + yDiff + pow(blur, 2));
   };
 }
@@ -150,7 +149,7 @@ DBAP::point DBAP::getNearestPoint() {
   }
 
   // get the projected point
-  // projected = projectedPoint(sourcePos, nearestSegment);
+  // projected = projectedPoint(sourcePtr, nearestSegment);
   // dist should get passed out
   return projectPoint(realSourcePos, *nearestSegment);
 }
@@ -181,8 +180,8 @@ void DBAP::next(int nSamples) {
   const float* input = in(0); // get the mono input signal
 
   // get stuff
-  rolloff = in0(4);
   blur = in0(5);
+  rolloff = in0(4);
   calcA();
   calcK();
 
@@ -197,7 +196,7 @@ void DBAP::next(int nSamples) {
       convexHull.isOutside = true;
       convexHull.projectedDist = (float) bg::distance(realSourcePos, convexHull.perimeter); // this should be elimiated
       convexHull.projectedPoint = getNearestPoint();
-      sourcePos = &convexHull.projectedPoint; // get the address instead of copying
+      sourcePtr = &convexHull.projectedPoint; // get the address instead of copying
 
       convexHull.gainCorrection = 1/pow(convexHull.projectedDist, 2); // fall off 1/d^2
       if(convexHull.gainCorrection > 1) {
@@ -207,7 +206,7 @@ void DBAP::next(int nSamples) {
       // std::cout << "nearest point: " << bg::wkt(convexHull.projectedPoint) << "\tdistance: " << convexHull.projectedDist << "\n";
     } else {
       convexHull.isOutside = false;
-      sourcePos = &realSourcePos; // get the address instead of copying
+      sourcePtr = &realSourcePos; // get the address instead of copying
       convexHull.gainCorrection = 1; // reset it to 1
     };
 

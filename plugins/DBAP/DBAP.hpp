@@ -23,7 +23,6 @@ public:
 
     struct speaker {
       point pos;
-      float ampCorrection;
       float gain = 0;
       float weight;
       float dist = 10.0; // distance from the source
@@ -40,7 +39,7 @@ public:
 
     int numSpeakers;
     speaker speakers[MAX_SPEAKERS];
-    point* sourcePos; // x, y. Default to the origin
+    point* sourcePtr; // x, y. Default to the origin
     point realSourcePos = point(0,0);
     convexHullStruct convexHull;
 
