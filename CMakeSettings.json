@@ -1,0 +1,26 @@
+{
+  "configurations": [
+    {
+      "name": "Debug",
+      "generator": "Unix Makefiles",
+      "configurationType" : "Debug",
+      "buildRoot":  "${projectDir}/build/${name}",
+      "cmakeCommandArgs":  "-DCMAKE_BUILD_TYPE=Debug -DSC_PATH=/home/roger/Documents/jacob/supercolliderSource/supercollider",
+      "buildCommandArgs": "--config Debug",
+      "ctestCommandArgs":  "",
+      "variables": [{
+        "name": "TEST_VAR",
+        "value": "ON"
+        }]
+    },
+    {
+      "name": "Release",
+      "generator": "Unix Makefiles",
+      "configurationType" : "Release",
+      "buildRoot": "${projectDir}/build/${name}",
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "",
+      "ctestCommandArgs": ""
+    }
+  ]
+}
