@@ -9,7 +9,7 @@ Distance-based ampltide panning (DBAP).
 
 - CMake >= 3.5
 - SuperCollider source code
-- Boost
+- Boost Geometry >= 1.65.1.0
 
 ### Building
 
