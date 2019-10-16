@@ -17,7 +17,7 @@ DBAP::DBAP() {
   int idx = 0;
   mCalcFunc = make_calc_function<DBAP, &DBAP::next>();
 
-  // get the buffer
+  // get the buffer ///////////////////////////
   float fbufnum = ZIN0(1);
 	uint32 ibufnum = (uint32)fbufnum;
 	World *world = unit->mWorld;
@@ -33,6 +33,7 @@ DBAP::DBAP() {
 	} else {
 		buf = world->mSndBufs + ibufnum;
 	}
+  ///////////////////////////////////////////////
 
   ////////////////////////////////////////////////////////
   // get values from the buffer
@@ -70,29 +71,6 @@ DBAP::DBAP() {
   bg::set<1>(realSourcePos, in0(3));
   sourcePtr = &realSourcePos; // use an address
   getDists();
-
-
-  // print
-#ifdef DEBUG
-  std::cout << "ins: " << numInputs() << "\tnumOutputs: " << numOutputs() << "\n";
-  std::cout << "buff length: " << bufferSize() << "\n";
-  std::cout << "numSpeakers: " << numSpeakers << ", ";
-  for(int i=0; i<numSpeakers; i++) {
-    std::cout << i << ": [" << getX(speakers[i].pos) << ", " << getY(speakers[i].pos) << "] weight: " << speakers[i].weight << ", ";
-  }
-  std::cout << "Convex Hull: " << bg::wkt(convexHull.perimeter) << "\n"; //getting the vertices back
-  std::cout << "Segments\n";
-  for(int i=0; i<numVert; i++) {
-    std::cout << "\t" << bg::wkt(convexHull.segments[i]) << "\n";
-  }
-  // std::cout << rolloff << "\n";
-  std::cout << "Dists: ";
-  for(int i=0; i<numSpeakers; i++) {
-    std::cout << speakers[i].dist << ", ";
-  }
-  std::cout << "\n";
-#endif
-
   next(1);
 }
 
@@ -114,27 +92,15 @@ void DBAP::calcK() {
 void DBAP::getDists() {
   sumOfDists = 0; // reset
 
-#ifdef DEBUG
-  std::cout << "diffs: " << "\n";
-#endif
-
   for(int i=0; i<numSpeakers; i++) {
     float xDiff, yDiff;
     xDiff = (float) pow(getX(speakers[i].pos) - getX(*sourcePtr), 2);
     yDiff = (float) pow(getY(speakers[i].pos) - getY(*sourcePtr), 2);
 
-#ifdef DEBUG
-      std::cout << "\t" << i << ": x=" << xDiff << ", y=" << yDiff << "\n";
-#endif
-
     speakers[i].dist = sqrt(xDiff + yDiff + pow(blur, 2));
     sumOfDists += pow(speakers[i].weight, 2) / pow(speakers[i].dist, 2);
     sqrtSumOfDists = sqrt(sumOfDists); // only do it when we need to
   }
-
-#ifdef DEBUG
-  std::cout << "Source used in calcuations: " << bg::wkt(*sourcePtr) << "\n";
-#endif
 }
 
 // calculate the gain for a speaker
@@ -157,9 +123,7 @@ DBAP::point DBAP::getNearestPoint() {
     }
   }
 
-  // get the projected point
-  // projected = projectedPoint(sourcePtr, nearestSegment);
-  // dist should get passed out
+  // get the projected point; dist should get passed out
   return projectPoint(realSourcePos, *nearestSegment);
 }
 
@@ -179,19 +143,6 @@ DBAP::point DBAP::projectPoint(const point &pos, const segment &seg) {
   // do math
   frac = ((sourceX - seg1X) * (seg2X - seg1X) + (sourceY - seg1Y) * (seg2Y - seg1Y)) /
     (pow(seg2X - seg1X, 2) + pow(seg2Y - seg1Y, 2));
-
-#ifdef DEBUG
-    std::cout << "Projected point values: \n"
-    << "\tsourceX: " << sourceX << "\n"
-    << "\tsourceY: " << sourceY << "\n"
-    << "\tseg1X: " << seg1X << "\n"
-    << "\tseg1Y: " << seg1Y << "\n"
-    << "\tseg2X: " << seg2X << "\n"
-    << "\tseg2Y: " << seg2Y << "\n"
-    << "\tfrac: " << frac << "\n"
-    << "\tsegment: " << bg::wkt(seg) << "\n";
-#endif
-
   return point(seg1X + (frac *  (seg2X - seg1X)), seg1Y + (frac *  (seg2Y - seg1Y)));
 }
 /////////////////////////////////////////////
@@ -200,7 +151,6 @@ DBAP::point DBAP::projectPoint(const point &pos, const segment &seg) {
 void DBAP::next(int nSamples) {
   auto* unit = this;
   const float* input = in(0); // get the mono input signal
-  bool changed = false;
 
   // get stuff
   blur = in0(5);
@@ -211,22 +161,15 @@ void DBAP::next(int nSamples) {
     bg::set<0>(realSourcePos, in0(2)); // just use the inputs
     bg::set<1>(realSourcePos, in0(3));
 
-    changed = true;
-
-    std::cout << "Source is now " << bg::wkt(realSourcePos) << "\n";
-
     // if the source is outside the convex hull...
     if(bg::within(realSourcePos, convexHull.perimeter)) {
-      std::cout << "Real source is inside the hull\n";
       sourcePtr = &realSourcePos; // get the address instead of copying
       convexHull.gainCorrection = 1; // reset it to 1
     } else {
-      std::cout << "Real source is outside the hull\n";
       convexHull.projectedDist = (float) bg::distance(realSourcePos, convexHull.perimeter); // this should be elimiated and instead returned by getNearestPoint()
       convexHull.projectedPoint = getNearestPoint();
       sourcePtr = &convexHull.projectedPoint; // get the address instead of copying
 
-      convexHull.gainCorrection = 1/convexHull.projectedDist; // fall off 1/d
 
       if(convexHull.projectedDist > 5.0) {
         convexHull.gainCorrection = 1/(convexHull.projectedDist - 5.0); // fall off 1/d AFTER 5m
@@ -234,26 +177,12 @@ void DBAP::next(int nSamples) {
       if(convexHull.gainCorrection > 1) {
         convexHull.gainCorrection  = 1;
       }
-
-#ifdef DEBUG
-      std::cout << "Gain correction: " << convexHull.gainCorrection << "\n";
-#endif
     }
-
     getDists(); // get distances after we've corrected for anything outside the hull
-
-#ifdef DEBUG
-    std::cout << "Dists: ";
-    for(int i=0; i<numSpeakers; i++) {
-      std::cout << speakers[i].dist << ", ";
-    }
-    std::cout << "\n";
-#endif
   }
 
   // get these after getDists() since sumOfDists is set inside
   calcA();
-  calcK();
   calcK(); // this has a sqrt inside... see if it can be eliminated with an if
 
   // iterate through each speaker BACKWARDS. See https://scsynth.org/t/plugin-multichannel-output/1353/2
@@ -271,17 +200,6 @@ void DBAP::next(int nSamples) {
     }
     speakers[spkr].gain = gain; // save the new gain as the old
   }
-
-#ifdef DEBUG
-  if(changed) {
-    for(int i=0; i<numSpeakers; i++) {
-      std::cout << "gain of " << i << ": " << speakers[i].gain << "\n";
-    }
-    changed = false;
-    std::cout << "\n";
-  }
-#endif
-
 }
 
 } // namespace DBAP

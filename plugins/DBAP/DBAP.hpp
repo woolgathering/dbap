@@ -10,7 +10,6 @@
 
 #define MAX_SPEAKERS 50
 #define R_20 0.05 // reciprocal of 20
-#define DEBUG
 
 namespace DBAP {
 
