@@ -14,6 +14,20 @@ Distance-based ampltide panning (DBAP). Based on the [paper](https://pdfs.semant
 
 ### Building
 
+#### Installing Boost
+
+DBAP uses Boost geometry to make some of the calculations easier to deal with. It may be removed in future versions.
+
+Ubuntu/Debian:
+
+    sudo apt-get install libboost-dev
+
+macOS with Homebrew:
+
+    brew install boost
+
+#### Compiling
+
 Clone the project:
 
     git clone https://woolgathering/dbap
