@@ -16,7 +16,7 @@ DBAP : MultiOutUGen {
 
 
 DBAPSpeakerArray {
-  var <positions, <weights, <convexHull, convexHullVerticies, <buff, <buffArray, sources;
+  var <positions, <weights, <convexHull, convexHullVerticies, <buff, <buffArray, sources, window;
 
   *new {|positions, weights|
     ^super.newCopyArgs(positions, weights).init;
@@ -27,7 +27,6 @@ DBAPSpeakerArray {
     positions = positions ?? {"No positions given".error; ^this};
     weights = weights ?? {Array.fill(positions.size, {1.0})}; // give an array of 1's if no weights are given
     sources = List.new(0); // an optional list for source positions
-    weights.postln;
 
     // note that because of a precision error, we can use only two digits after the decimal
     // otherwise .indexOfEqual() can return nil values! This needs to be mitigated in the future.
@@ -44,7 +43,6 @@ DBAPSpeakerArray {
     if(buff.isNil) {
       array = array ++ positions.size ++ positions ++ weights ++ convexHull.size ++ convexHullVerticies;
       array = array.flat;
-      array.postln;
       if(array.size < 32) {
         array = array ++ Array.fill(array.size.nextPowerOfTwo - array.size, {0}); // extend with zeros since SC breaks if size < 32
       };
@@ -64,19 +62,15 @@ DBAPSpeakerArray {
 
   // a crude (for now) visualizer
   plot {
-    var chTrans, posTrans, window;
+    var chTrans, posTrans, sourceTrans;
 
     // sloppy but it's only run once ¯\_(ツ)_/¯
     defer {
       window = Window.new.front;
       window.view.background_(Color.white);
 
-      chTrans = convexHull.collect{|vert| vert*[10,-10]};
-      chTrans = chTrans + [window.bounds.width/2, window.bounds.height / 2];
-      chTrans = chTrans.collect{|vert| vert.asPoint};
-      posTrans = positions.collect{|vert| vert*[10,-10]};
-      posTrans = posTrans + [window.bounds.width/2, window.bounds.height / 2];
-      posTrans = posTrans.collect{|vert| vert.asPoint};
+      chTrans = convexHull.collect{|vert| this.correctForPlot(vert)};
+      posTrans = positions.collect{|vert| this.correctForPlot(vert)};
 
       window.drawFunc = {
         // outline the convex hull
@@ -98,6 +92,17 @@ DBAPSpeakerArray {
         };
         Pen.stroke;
 
+        // draw the sources
+        Pen.fillColor = Color.green;
+        sourceTrans = sources.collect{|source| this.correctForPlot(source)};
+        sourceTrans.do{|source, i|
+          Pen.addOval(Rect(source.x-5, source.y-5, 10,10));
+          StaticText(window, Rect(source.x+5, source.y+5, 10,10))
+            .string_(i.asString)
+            .font_(Font(size: 10));
+        };
+        Pen.fill;
+
         // put in a scale
         Pen.strokeColor = Color.gray(0.4, 0.5);
         Pen.width = 1;
@@ -118,8 +123,24 @@ DBAPSpeakerArray {
     };
   }
 
+  correctForPlot {|point|
+    point = point*[10,-10];
+    point = point + [window.bounds.width/2, window.bounds.height / 2];
+    ^point.asPoint
+  }
+
   addSource {|source|
     sources.add(source);
+    defer {window.refresh};
+  }
+
+  modifySource {|idx, source|
+    if(idx>sources.size-1) {
+      "No such source exists! Sources: %".format(sources).error;
+    } {
+      sources[idx] = source;
+      defer {window.refresh};
+    };
   }
 
   // Graham scan to find the convex hull of a set of points
