@@ -226,6 +226,10 @@ void DBAP::next(int nSamples) {
       sourcePtr = &convexHull.projectedPoint; // get the address instead of copying
 
       convexHull.gainCorrection = 1/convexHull.projectedDist; // fall off 1/d
+
+      if(convexHull.projectedDist > 5.0) {
+        convexHull.gainCorrection = 1/(convexHull.projectedDist - 5.0); // fall off 1/d AFTER 5m
+      }
       if(convexHull.gainCorrection > 1) {
         convexHull.gainCorrection  = 1;
       }
