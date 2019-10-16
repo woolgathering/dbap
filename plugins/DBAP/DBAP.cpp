@@ -4,7 +4,6 @@
 #include "SC_PlugIn.hpp"
 #include "DBAP.hpp"
 #include <cmath>
-#include <iostream>
 #include <boost/geometry.hpp>
 namespace bg = boost::geometry;
 
@@ -67,8 +66,7 @@ DBAP::DBAP() {
   // initialize stuff
   rolloff = in0(4);
   blur = in0(5);
-  bg::set<0>(realSourcePos, in0(2));
-  bg::set<1>(realSourcePos, in0(3));
+  bg::assign_values(realSourcePos, in0(2), in0(3));
   sourcePtr = &realSourcePos; // use an address
   getDists();
   next(1);
@@ -158,8 +156,7 @@ void DBAP::next(int nSamples) {
 
   // only recalculate when the source moves
   if((getX(realSourcePos) != in0(2)) || (getY(realSourcePos) != in0(3))) {
-    bg::set<0>(realSourcePos, in0(2)); // just use the inputs
-    bg::set<1>(realSourcePos, in0(3));
+    bg::assign_values(realSourcePos, in0(2), in0(3));
 
     // if the source is outside the convex hull...
     if(bg::within(realSourcePos, convexHull.perimeter)) {
@@ -169,7 +166,6 @@ void DBAP::next(int nSamples) {
       convexHull.projectedDist = (float) bg::distance(realSourcePos, convexHull.perimeter); // this should be elimiated and instead returned by getNearestPoint()
       convexHull.projectedPoint = getNearestPoint();
       sourcePtr = &convexHull.projectedPoint; // get the address instead of copying
-
 
       if(convexHull.projectedDist > 5.0) {
         convexHull.gainCorrection = 1/(convexHull.projectedDist - 5.0); // fall off 1/d AFTER 5m
