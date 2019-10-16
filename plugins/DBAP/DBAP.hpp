@@ -10,6 +10,7 @@
 
 #define MAX_SPEAKERS 50
 #define R_20 0.05 // reciprocal of 20
+#define DEBUG
 
 namespace DBAP {
 
@@ -34,7 +35,6 @@ public:
       segment segments[MAX_SPEAKERS];
       point projectedPoint;
       float projectedDist = 0;
-      // bool isOutside = false;
       float gainCorrection = 1; // gain correction when the source is outside the hull
     };
 
@@ -73,7 +73,6 @@ private:
     float sumOfDists = 0;
     float m_fbufnum;
     SndBuf* m_buf;
-    float* data;
 
 };
 

@@ -1,9 +1,9 @@
 DBAP : MultiOutUGen {
-	*ar { |numSpeakers, source, sourceX = 0, sourceY = 0, buf, rolloff = 0.50118723362727, blur = 0|
-		^this.multiNew('audio', numSpeakers, source, sourceX, sourceY, buf, rolloff, blur);
+	*ar { |numSpeakers, source, buff, sourceX = 0, sourceY = 0, rolloff = 0.50118723362727, blur = 0|
+		^this.multiNew('audio', numSpeakers, source, buff, sourceX, sourceY, rolloff, blur);
 	}
 
-  init { arg numSpeakers ... theInputs;
+  init {|numSpeakers ... theInputs|
 		inputs = theInputs;
 		^this.initOutputs(numSpeakers, rate);
 	}
@@ -24,22 +24,38 @@ DBAPSpeakerArray {
 
   init {
     positions = positions ?? {"No positions given".error; ^this};
-    weights = weights ?? {Array.fill(positions.size, {1})}; // give an array of 1's if no weights are given
-    convexHull = this.grahamScan2D(positions); // get the convex hull
-    convexHullVerticies = convexHull.collect{|vert| positions.indexOfEqual(vert)}; // get the speakers that form the hull
+    weights = weights ?? {Array.fill(positions.size, {1.0})}; // give an array of 1's if no weights are given
     sources = List.new(0); // an optional list for source positions
+
+    // note that because of a precision error, we can use only two digits after the decimal
+    // otherwise .indexOfEqual() can return nil values! This needs to be mitigated in the future.
+    // it may not present a problem since if we use meters, speakers must be no closer than 1cm!
+    convexHull = this.grahamScan2D(positions.round(0.01)); // get the convex hull
+    convexHullVerticies = convexHull.collect{|vert| positions.round(0.01).indexOfEqual(vert)}; // get the speakers that form the hull
+    convexHull = convexHullVerticies.collect{|idx| positions[idx]}; // get back our original precision
   }
 
   makeBuffer {
     var array = [];
-    array = array ++ positions.size ++ positions ++ weights ++ convexHull.size ++ convexHullVerticies;
-    if(array.size < 32) {
-      array = array ++ Array.fill(32-array.size, {0}); // extend with zeros since SC breaks if size < 32
-    };
-    buffArray = array; // for debugging
-    buff = Buffer.loadCollection(Server.default, array.flat, action: {
-      "DBAP buffer loaded".postln;
-    }); // make the buffer
+    if(buff.isNil) {
+      array = array ++ positions.size ++ positions ++ weights ++ convexHull.size ++ convexHullVerticies;
+      array = array.flat;
+      array.postln;
+      if(array.size < 32) {
+        array = array ++ Array.fill(array.size.nextPowerOfTwo - array.size, {0}); // extend with zeros since SC breaks if size < 32
+      };
+      buffArray = array.flat; // for debugging
+      buff = Buffer.loadCollection(Server.default, array.flat, action: {
+        "DBAP buffer loaded".postln;
+        }); // make the buffer
+    } {
+      "Buffer is already loaded!"
+    }
+  }
+
+  free {
+    buff.free;
+    buff = nil;
   }
 
   // a crude (for now) visualizer
