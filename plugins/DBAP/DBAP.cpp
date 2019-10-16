@@ -107,7 +107,7 @@ void DBAP::calcA() {
 
 // calculate k
 void DBAP::calcK() {
-  k = (2*a) / sqrt(sumOfDists);
+  k = (2*a) / sqrtSumOfDists;
 }
 
 // get distance manually to include the blur parameter
@@ -129,6 +129,7 @@ void DBAP::getDists() {
 
     speakers[i].dist = sqrt(xDiff + yDiff + pow(blur, 2));
     sumOfDists += pow(speakers[i].weight, 2) / pow(speakers[i].dist, 2);
+    sqrtSumOfDists = sqrt(sumOfDists); // only do it when we need to
   }
 
 #ifdef DEBUG
@@ -253,6 +254,7 @@ void DBAP::next(int nSamples) {
   // get these after getDists() since sumOfDists is set inside
   calcA();
   calcK();
+  calcK(); // this has a sqrt inside... see if it can be eliminated with an if
 
   // iterate through each speaker BACKWARDS. See https://scsynth.org/t/plugin-multichannel-output/1353/2
   for(short int spkr=numSpeakers-1; spkr>=0; spkr--) {

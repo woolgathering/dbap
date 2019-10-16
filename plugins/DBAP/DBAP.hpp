@@ -70,7 +70,7 @@ private:
     // Member variables
     float k, a;
     float rolloff, blur;
-    float sumOfDists = 0;
+    float sumOfDists, sqrtSumOfDists;
     float m_fbufnum;
     SndBuf* m_buf;
 
