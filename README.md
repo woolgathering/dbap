@@ -3,7 +3,8 @@
 Author: Jacob Sundstrom
 
 __This is pre-alpha and should NOT be deployed in the field!__ It is in a highly experimental stage.
-Distance-based ampltide panning (DBAP).
+
+Distance-based ampltide panning (DBAP). Based on the [paper](https://pdfs.semanticscholar.org/132a/028b9febadd03f2c75e5f79ca500c2dd04fd.pdf?_ga=2.103137216.1512247688.1571200723-789701753.1569525663) by Trond Lossius, Pascal Baltazar, and Théo de la Hogue.
 
 ### Requirements
 
