@@ -23,16 +23,20 @@ DBAPSpeakerArray {
   }
 
   init {
+    var posRound;
     positions = positions ?? {"No positions given".error; ^this};
     weights = weights ?? {Array.fill(positions.size, {1.0})}; // give an array of 1's if no weights are given
     sources = List.new(0); // an optional list for source positions
+    weights.postln;
 
     // note that because of a precision error, we can use only two digits after the decimal
     // otherwise .indexOfEqual() can return nil values! This needs to be mitigated in the future.
     // it may not present a problem since if we use meters, speakers must be no closer than 1cm!
-    convexHull = this.grahamScan2D(positions.round(0.01)); // get the convex hull
-    convexHullVerticies = convexHull.collect{|vert| positions.round(0.01).indexOfEqual(vert)}; // get the speakers that form the hull
+    posRound = positions.round(0.01);
+    convexHull = this.grahamScan2D(posRound); // get the convex hull
+    convexHullVerticies = convexHull.collect{|vert| posRound.indexOfEqual(vert.round(0.01))}; // get the speakers that form the hull
     convexHull = convexHullVerticies.collect{|idx| positions[idx]}; // get back our original precision
+
   }
 
   makeBuffer {
