@@ -14,8 +14,6 @@ addons:
 
 before_install:
     - git clone --recursive --depth 1 https://github.com/supercollider/supercollider.git ../supercollider
-    - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew update          ; fi
-    - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install boost   ; fi
 
 before_script:
     - mkdir build
