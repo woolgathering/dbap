@@ -131,15 +131,15 @@ DBAPSpeakerArray {
 
   addSource {|source|
     sources.add(source);
-    defer {window.refresh};
+    if(window.notNil) {defer {window.refresh}};
   }
 
   modifySource {|idx, source|
-    if(idx>sources.size-1) {
+    if(idx>(sources.size-1)) {
       "No such source exists! Sources: %".format(sources).error;
     } {
       sources[idx] = source;
-      defer {window.refresh};
+      if(window.notNil) {defer {window.refresh}};
     };
   }
 

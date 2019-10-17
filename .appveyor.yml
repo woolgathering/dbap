@@ -30,6 +30,7 @@ install:
 before_build:
 - mkdir build
 - cd build
+- cp ../../supercollider/SCVERSION.txt ../SCVersion.txt
 
 build_script:
 - cmake -G "%CMAKE_GENERATOR%" -DSC_PATH=../supercollider -DCMAKE_INSTALL_PREFIX=_install ..
