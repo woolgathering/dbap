@@ -103,8 +103,9 @@ void DBAP::getDists() {
 
 // calculate the gain for a speaker
 float DBAP::calcGain(const speaker &speaker) {
-  float dB = (k * speaker.dist) / pow(speaker.dist, a); // returns amplitude in dB
-  return pow(10, dB*R_20); // convert to linear amplitude
+  // float dB = (k * speaker.dist) / pow(speaker.dist, a); // returns amplitude in dB
+  // return pow(10, dB*R_20); // convert to linear amplitude
+  return (k*speaker.weight) / (2*speaker.distance*a);
 }
 
 // do distance manually to each segment and keep the segment of the convex hull which is closest to the source
