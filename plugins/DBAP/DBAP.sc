@@ -86,8 +86,7 @@ DBAPSpeakerArray {
         Pen.strokeColor = Color.blue;
         posTrans.do{|spkr, i|
           Pen.addOval(Rect(spkr.x-5, spkr.y-5, 10,10));
-          Pen.strokeColor = Color.black;
-          Pen.stringAtPoint(i.asString, Point(spkr.x+5, spkr.y+5), Font(size: 10));
+          Pen.stringAtPoint(i.asString, Point(spkr.x+5, spkr.y+5), Font(size: 10), Color.black);
         };
         Pen.stroke;
 
@@ -96,8 +95,7 @@ DBAPSpeakerArray {
         sourceTrans = sources.collect{|source| this.correctForPlot(source)};
         sourceTrans.do{|source, i|
           Pen.addOval(Rect(source.x-5, source.y-5, 10,10));
-          Pen.strokeColor = Color.black;
-          Pen.stringAtPoint(i.asString, Point(source.x+5, source.y+5), Font(size: 10));
+          Pen.stringAtPoint(i.asString, Point(source.x+5, source.y+5), Font(size: 10), Color.black);
         };
         Pen.fill;
 
@@ -112,8 +110,7 @@ DBAPSpeakerArray {
         Pen.stroke;
 
         // add a label
-        Pen.strokeColor = Color.black;
-        Pen.stringAtPoint("%m x %m".format(window.bounds.width/10, window.bounds.height/10), Point(10,10), Font(size: 12));
+        Pen.stringAtPoint("%m x %m".format(window.bounds.width/10, window.bounds.height/10), Point(10,10), Font(size: 12)), Color.black;
       };
       window.refresh;
       ^window;
@@ -133,7 +130,7 @@ DBAPSpeakerArray {
 
   modifySource {|idx, source|
     if(idx>(sources.size-1)) {
-      "No such source exists! Sources: %".format(sources).error;
+      "No such source exists! Sources: %".format(sources.asArray).error;
     } {
       sources[idx] = source;
       if(window.notNil) {defer {window.refresh}};
