@@ -18,20 +18,20 @@ DBAP::DBAP() {
 
   // get the buffer
   float fbufnum = ZIN0(1);
-	uint32 ibufnum = (uint32)fbufnum;
-	World *world = unit->mWorld;
-	SndBuf *buf;
-	if (ibufnum >= world->mNumSndBufs) {
-		int localBufNum = ibufnum - world->mNumSndBufs;
-		Graph *parent = unit->mParent;
-		if(localBufNum <= parent->localBufNum) {
-			buf = parent->mLocalSndBufs + localBufNum;
-		} else {
-			buf = world->mSndBufs;
-		}
-	} else {
-		buf = world->mSndBufs + ibufnum;
-	}
+  uint32 ibufnum = (uint32)fbufnum;
+  World *world = unit->mWorld;
+  SndBuf *buf;
+  if (ibufnum >= world->mNumSndBufs) {
+    int localBufNum = ibufnum - world->mNumSndBufs;
+    Graph *parent = unit->mParent;
+    if(localBufNum <= parent->localBufNum) {
+      buf = parent->mLocalSndBufs + localBufNum;
+    } else {
+      buf = world->mSndBufs;
+    }
+  } else {
+    buf = world->mSndBufs + ibufnum;
+  }
 
   ////////////////////////////////////////////////////////
   // get values from the buffer
