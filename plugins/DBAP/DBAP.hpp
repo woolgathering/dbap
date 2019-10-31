@@ -9,7 +9,8 @@
 #include <boost/geometry/geometries/polygon.hpp>
 
 #define MAX_SPEAKERS 50
-#define R_20 0.05 // reciprocal of 20
+#define R_20LOG 0.16609640474 // reciprocal of (20*log10(2))
+#define DEBUG
 
 namespace DBAP {
 
@@ -26,7 +27,8 @@ public:
       point pos;
       float gain = 0;
       float weight;
-      float dist = 10.0; // distance from the source
+      float projectedDist = 0.f; // distance from the source (if outside the hull, from the projected source)
+      float realDist = 0.f; // real distance from the source (realDist=dist if source is inside the hull)
     };
 
     struct convexHullStruct {
@@ -34,14 +36,14 @@ public:
       segment segments[MAX_SPEAKERS];
       point projectedPoint;
       float projectedDist = 0;
-      float gainCorrection = 1; // gain correction when the source is outside the hull
     };
 
     int numSpeakers;
     speaker speakers[MAX_SPEAKERS];
-    point* sourcePtr; // x, y. Default to the origin
     point realSourcePos = point(0,0);
+    point projectedSourcePos = point(0,0);
     convexHullStruct convexHull;
+    segment* nearestSegment;
 
     // Destructor
     // ~DBAP();
@@ -51,8 +53,10 @@ private:
     void next(int nSamples);
     void calcA();
     void calcK();
-    void getDists();
-    float calcGain(const speaker &speaker);
+    void getDists(bool outsideHull);
+    float calcGain(const speaker &speaker, const bool outsideHull);
+    float calcRealGain(const speaker &speaker);
+    float calcAbsoluteGain(const speaker &speaker);
     bool insideConvexHull(const point &source);
     point getNearestPoint();
     point projectPoint(const point &pos, const segment &seg);
@@ -67,9 +71,9 @@ private:
     }
 
     // Member variables
-    float k, a;
+    float k, realA, projectedA;
     float rolloff, blur;
-    float sumOfDists, sqrtSumOfDists;
+    float sqrtSumOfDists;
     float m_fbufnum;
     SndBuf* m_buf;
 
