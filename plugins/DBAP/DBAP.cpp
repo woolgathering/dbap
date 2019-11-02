@@ -72,7 +72,6 @@ DBAP::DBAP() {
   next(1);
 }
 
-
 /////////////////////////////////////////////
 // DBAP functions ///////////////////////////
 /////////////////////////////////////////////
@@ -88,7 +87,6 @@ void DBAP::calcK() {
 }
 
 // get distance between the source and the speakers
-// if the source is outside the hull, get the real distances as well as all the rays
 void DBAP::getDists(bool outsideHull) {
   float sumOfDists = 0; // reset
 

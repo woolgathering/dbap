@@ -65,7 +65,6 @@ private:
     float getX(const point &point) {
       return (float) boost::geometry::get<0>(point);
     }
-
     float getY(const point &point) {
       return (float) boost::geometry::get<1>(point);
     }

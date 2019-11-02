@@ -110,7 +110,7 @@ DBAPSpeakerArray {
         Pen.stroke;
 
         // add a label
-        Pen.stringAtPoint("%m x %m".format(window.bounds.width/10, window.bounds.height/10), Point(10,10), Font(size: 12)), Color.black;
+        Pen.stringAtPoint("%m x %m".format(window.bounds.width/10, window.bounds.height/10), Point(10,10), Font(size: 12), Color.black);
       };
       window.refresh;
       ^window;
