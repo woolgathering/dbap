@@ -12,6 +12,8 @@
 #define R_20LOG 0.16609640474 // reciprocal of (20*log10(2))
 #define DEBUG
 
+// #define DefineSimpleCantAliasUnit(name) (*ft->fDefineUnit)(#name, sizeof(name), (UnitCtorFunc)&name##, 0, kUnitDef_CantAliasInputsToOutputs);
+
 namespace DBAP {
 
 class DBAP : public SCUnit {
@@ -44,6 +46,7 @@ public:
     point projectedSourcePos = point(0,0);
     convexHullStruct convexHull;
     segment* nearestSegment;
+    bool outside = false;
 
     // Destructor
     // ~DBAP();
@@ -55,8 +58,8 @@ private:
     void calcK();
     void getDists(bool outsideHull);
     float calcGain(const speaker &speaker, const bool outsideHull);
-    float calcRealGain(const speaker &speaker);
-    float calcAbsoluteGain(const speaker &speaker);
+    float calcGainWithK(const float &dist, const float &weight);
+    float calcGainWithoutK(const float &dist, const float &weight);
     bool insideConvexHull(const point &source);
     point getNearestPoint();
     point projectPoint(const point &pos, const segment &seg);
@@ -70,7 +73,7 @@ private:
     }
 
     // Member variables
-    float k, realA, projectedA;
+    float k, a;
     float rolloff, blur;
     float sqrtSumOfDists;
     float m_fbufnum;

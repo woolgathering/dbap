@@ -77,8 +77,7 @@ DBAP::DBAP() {
 /////////////////////////////////////////////
 // calculate a
 void DBAP::calcA() {
-  realA = rolloff*R_20LOG;
-  projectedA = (rolloff*0.5)*R_20LOG;
+  a = rolloff*R_20LOG;
 }
 
 // calculate k
@@ -96,7 +95,7 @@ void DBAP::getDists(bool outsideHull) {
     yDiff = (float) pow(getY(speakers[i].pos) - getY(realSourcePos), 2);
 
     speakers[i].realDist = sqrt(xDiff + yDiff + pow(blur, 2));
-    sumOfDists += pow(speakers[i].weight, 2) / pow(speakers[i].realDist, 2*realA);
+    sumOfDists += pow(speakers[i].weight, 2) / pow(speakers[i].realDist, 2*a);
 
     // if it's outside the hull, also get the distances from the projection for biasing
     if(outsideHull) {
@@ -112,24 +111,31 @@ void DBAP::getDists(bool outsideHull) {
 float DBAP::calcGain(const speaker &speaker, const bool outsideHull) {
   // if outside, bias the amplitudes
   if(outsideHull) {
-    return calcRealGain(speaker)*calcAbsoluteGain(speaker);
+    // return (calcRealGain(speaker) * calcAbsoluteGain(speaker));
+    return (calcGainWithK(speaker.projectedDist, speaker.weight) * calcGainWithoutK(speaker.realDist, speaker.weight));
   } else {
-    return calcRealGain(speaker);
+    // return calcRealGain(speaker);
+    return calcGainWithK(speaker.realDist, speaker.weight);
   }
 }
 
 // calculate the real gain for a speaker
-float DBAP::calcRealGain(const speaker &speaker) {
-  if(speaker.realDist <= 0.f) {
+float DBAP::calcGainWithK(const float &dist, const float &weight) {
+  float gain = (k*weight) / pow(dist, a);
+  if(dist <= 0.f) {
     return 1;
   } else {
-    return (k*speaker.weight) / pow(speaker.realDist, realA);
+    if(gain < 1.f) {
+      return gain;
+    } else {
+      return 1;
+    }
   }
 }
 
 // get the absolute gain (bias gain for sources outside the hull)
-float DBAP::calcAbsoluteGain(const speaker &speaker) {
-  float gain = speaker.weight/pow(speaker.projectedDist, projectedA);
+float DBAP::calcGainWithoutK(const float &dist, const float &weight) {
+  float gain = weight/pow(dist, a);
   if(gain < 1.f) {
     return gain;
   } else {
@@ -195,8 +201,6 @@ DBAP::point DBAP::projectPoint(const point &pos, const segment &seg) {
 void DBAP::next(int nSamples) {
   auto* unit = this;
   const float* input = in(0); // get the mono input signal
-  bool changed = false;
-  bool outside;
 
   // get stuff
   blur = in0(5) + 0.0001;
@@ -229,10 +233,10 @@ void DBAP::next(int nSamples) {
     // calculate the gain and find the increment;
     gain = calcGain(speakers[spkr], outside);
     diff = gain - speakers[spkr].gain;
-    inc = diff/nSamples;
+    inc = diff/(nSamples-1);
 
     for(short int i=0; i<nSamples; i++) {
-      outbuf[i] = input[i] * (speakers[spkr].gain + (diff*inc*i));
+      outbuf[i] = input[i] * (speakers[spkr].gain + (inc*i));
     }
     speakers[spkr].gain = gain; // save the new gain as the old
   }
