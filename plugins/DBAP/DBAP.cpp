@@ -4,6 +4,7 @@
 #include "SC_PlugIn.hpp"
 #include "DBAP.hpp"
 #include <cmath>
+#include <algorithm>
 #include <boost/geometry.hpp>
 namespace bg = boost::geometry;
 
@@ -109,14 +110,17 @@ void DBAP::getDists(bool outsideHull) {
 }
 
 float DBAP::calcGain(const speaker &speaker, const bool outsideHull) {
+  float gain;
   // if outside, bias the amplitudes
   if(outsideHull) {
     // return (calcRealGain(speaker) * calcAbsoluteGain(speaker));
-    return (calcGainWithK(speaker.projectedDist, speaker.weight) * calcGainWithoutK(speaker.realDist, speaker.weight));
+    // return (calcGainWithK(speaker.projectedDist, speaker.weight) * calcGainWithoutK(speaker.realDist, speaker.weight));
+    gain = (k*pow(speaker.weight,2)) / pow(speaker.realDist*speaker.projectedDist, a);
   } else {
     // return calcRealGain(speaker);
-    return calcGainWithK(speaker.realDist, speaker.weight);
+    gain = calcGainWithK(speaker.realDist, speaker.weight);
   }
+  return std::min(gain, 1.f);
 }
 
 // calculate the real gain for a speaker
