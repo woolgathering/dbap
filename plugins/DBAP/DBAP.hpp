@@ -18,7 +18,7 @@ namespace DBAP {
 
 class DBAP : public SCUnit {
   // for the convex hull
-  typedef boost::geometry::model::d2::point_xy<float> point;
+  typedef boost::geometry::model::d2::point_xy<double> point;
   typedef boost::geometry::model::polygon<point> polygon;
   typedef boost::geometry::model::segment<point> segment;
 
@@ -27,17 +27,17 @@ public:
 
     struct speaker {
       point pos;
-      float gain = 0;
-      float weight;
-      float projectedDist = 0.f; // distance from the source (if outside the hull, from the projected source)
-      float realDist = 0.f; // real distance from the source (realDist=dist if source is inside the hull)
+      double gain = 0;
+      double weight;
+      double projectedDist = 0.f; // distance from the source (if outside the hull, from the projected source)
+      double realDist = 0.f; // real distance from the source (realDist=dist if source is inside the hull)
     };
 
     struct convexHullStruct {
       polygon perimeter;
       segment segments[MAX_SPEAKERS];
       point projectedPoint;
-      float projectedDist = 0;
+      double projectedDist = 0.0;
     };
 
     int numSpeakers;
@@ -57,25 +57,27 @@ private:
     void calcA();
     void calcK();
     void getDists(bool outsideHull);
-    float calcGain(const speaker &speaker, const bool outsideHull);
-    float calcGainWithK(const float &dist, const float &weight);
-    float calcGainWithoutK(const float &dist, const float &weight);
+    double calcGain(const speaker &speaker, const bool outsideHull);
+    double calcGainWithK(const double &dist, const double &weight);
+    double calcGainWithoutK(const double &dist, const double &weight);
     bool insideConvexHull(const point &source);
     point getNearestPoint();
     point projectPoint(const point &pos, const segment &seg);
+    int checkIfNewArgs(const float &x, const float &y, const float &b, const float &r);
+    double scale(const double &realDist, const double &projDist, const double &absProjDist, double maxDist);
 
     // convenience functions
-    float getX(const point &point) {
-      return (float) boost::geometry::get<0>(point);
+    double getX(const point &point) {
+      return (double) boost::geometry::get<0>(point);
     }
-    float getY(const point &point) {
-      return (float) boost::geometry::get<1>(point);
+    double getY(const point &point) {
+      return (double) boost::geometry::get<1>(point);
     }
 
     // Member variables
-    float k, a;
-    float rolloff, blur;
-    float sqrtSumOfDists;
+    double k, a;
+    double rolloff, blur;
+    double sqrtSumOfDists;
     float m_fbufnum;
     SndBuf* m_buf;
 
