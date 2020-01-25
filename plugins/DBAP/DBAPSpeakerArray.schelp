@@ -1,0 +1,128 @@
+TITLE:: DBAPSpeakerArray
+summary:: (put short description here)
+categories:: Undocumented classes
+related:: Classes/SomeRelatedClass, Reference/SomeRelatedStuff, etc.
+
+DESCRIPTION::
+A class to use with LINK::Classes/DBAP::
+
+
+CLASSMETHODS::
+
+METHOD:: new
+ARGUMENT:: positions
+An array of the positions of the speakers.
+ARGUMENT:: weights
+An array of the weights of the speakers.
+DISCUSSION::The
+
+CODE::
+// make a square
+d = DBAPSpeakerArray([[-4, 4], [4,4], [4,-4], [-4, -4]], [1,1,1,1]);
+d.makeBuffer; // make the buffer that gets passed to DBAP
+d.buff; // the actual buffer
+::
+
+
+INSTANCEMETHODS::
+
+METHOD:: makeBuffer
+Make the buffer that is passed to the DBAP UGen.
+returns:: A DBAPSpeakerArray
+
+METHOD:: weights
+Return the weights of the speakers. Cannot currently be changed.
+
+METHOD:: buff
+The buffer that is passed to the DBAP UGen.
+returns:: A Buffer
+
+METHOD:: free
+Free the buffer.
+
+
+
+SUBSECTION::Plotting
+There are various functionalities to plot the field and sources to ease visualization.
+
+METHOD:: plot
+Plot the speakers, sources, and outline the convex hull. Speakers are plotted as empty blue circles, the sources as filled in green circles, and the convex hull as red lines. The default size (currenlty cannot modify) of the canvas is 40mx40m. Each speaker and source is labeled.
+
+METHOD:: addSource
+Add a source that will be plotted.
+ARGUMENT:: source
+A two-element array of x,y coordinates for the position of the source.
+
+METHOD:: modifySource
+Modify the position of the source in the plot.
+NOTE::This does not change the position of the source as calculated by the DBAP UGen. Likewise, moving the source for the UGen does not move the source in the plot. They are independent.::
+ARGUMENT:: idx
+Which source to move since multiple sources can be plotted at once.
+ARGUMENT:: source
+The new location in a two-element array.
+
+METHOD::removeSource
+Remove a source at the specified index. If nil, remove the last source.
+ARGUMENT::idx
+Which source to remove from the plot.
+NOTE::Removing a source that is not the last in the list will cause the rest of the sources to be relabeled accordingly.::
+
+
+
+
+
+
+
+METHOD:: buffArray
+(describe method here)
+
+returns:: (describe returnvalue here)
+
+
+
+
+METHOD:: correctForPlot
+(describe method here)
+
+ARGUMENT:: point
+(describe argument here)
+
+returns:: (describe returnvalue here)
+
+
+
+METHOD:: sources
+(describe method here)
+
+returns:: (describe returnvalue here)
+
+METHOD:: convexHull
+(describe method here)
+
+returns:: (describe returnvalue here)
+
+
+METHOD:: positions
+(describe method here)
+
+returns:: (describe returnvalue here)
+
+METHOD:: grahamScan2D
+(describe method here)
+
+ARGUMENT:: speakerPositions
+(describe argument here)
+
+returns:: (describe returnvalue here)
+
+METHOD:: init
+(describe method here)
+
+returns:: (describe returnvalue here)
+
+
+EXAMPLES::
+
+code::
+(some example code)
+::

@@ -1,26 +1,65 @@
 class:: DBAP
 summary:: Distance-based ampltide panning
-related:: TODO
-categories:: UGens>TODO
+related:: Classes/DBAPSpeakerArray
+categories:: UGens>
 
-description::
+DESCRIPTION::
+An implementation of the DBAP algorithm by Trond Lossius in two dimensions with some (somewhat) significant changes. Read about it on the repo: https://github.com/woolgathering/dbap.
 
-Distance-based ampltide panning
+CLASSMETHODS::
 
+METHOD:: ar
+ARGUMENT:: numSpeakers
+The number of speakers in the field. This must be equal to the number of speakers in the DBAPSpeakerArray.
+ARGUMENT:: source
+A mono sound source
+ARGUMENT:: buff
+A LINK::Classes/DBAPSpeakerArray:: buffer.
+ARGUMENT:: sourceX
+The x position of the source
+ARGUMENT:: sourceY
+The y position of the source
+ARGUMENT:: rolloff
+The rolloff for distance in dB. Note that this value is positive!
+ARGUMENT:: blur
+The spatial blur
 
-classmethods::
+PRIVATE:: checkInputs, init::
 
-method::ar, kr
-
-argument::TODO
-
-argument::TODO
-
-
-examples::
+EXAMPLES::
 
 code::
+SynthDef(\dbap_8, {|sourceX = 0, sourceY = 0, buf, rolloff = 0, blur = 0|
+	var sig;
+	sig = DBAP.ar(8, SinOsc.ar(880)*0.5, buf, sourceX.lag2, sourceY.lag2, rolloff, blur);
+	Out.ar(0, sig);
+}).add;
 
-{ DBAP.ar(/* TODO */) }.play
+// make a DBAP SpeakerArray in four corners of a square with weights of 1
+d = DBAPSpeakerArray([[-4, 4], [4,4], [4,-4], [-4, -4]], [1,1,1,1]).makeBuffer;
 
+z = Synth(\dbap_8, [sourceX: 0, sourceY: 0, buf: d.buff, rolloff: 12, blur: 0.1]);
+
+d.addSource([0,0]); // add a source at [0,0]
+d.plot; // plot it
+
+// now do a routine and move the source
+~mag = 10; // raddius
+~angfreq = 2pi/50; // radians per timestep
+r = fork {
+  var mag, magPattern, angle, x, y, point;
+	angle = 0;
+  loop {
+	  angle = angle + ~angfreq; // get the new angle
+	  point = Polar(~mag, angle).asPoint; // convert from Polar to Cartesian
+    d.modifySource(0, [point.x,point.y]); // modify the source in the plot
+    s.makeBundle(nil, {
+      z.set(\sourceX, point.x);
+      z.set(\sourceY, point.y);
+    });
+    0.5.wait;
+  }
+};
+
+r.stop;
 ::

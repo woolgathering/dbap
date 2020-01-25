@@ -1,5 +1,5 @@
 DBAP : MultiOutUGen {
-	*ar { |numSpeakers, source, buff, sourceX = 0, sourceY = 0, rolloff = 0.50118723362727, blur = 0|
+	*ar { |numSpeakers, source, buff, sourceX = 0, sourceY = 0, rolloff = 3, blur = 0|
 		^this.multiNew('audio', numSpeakers, source, buff, sourceX, sourceY, rolloff, blur);
 	}
 
@@ -135,6 +135,14 @@ DBAPSpeakerArray {
       sources[idx] = source;
       if(window.notNil) {defer {window.refresh}};
     };
+  }
+
+  removeSource {|idx|
+    if (idx.isNil) {
+      sources.pop; // if no arg, remove the last BoidUnit
+      } {
+        sources.removeAt(idx); // else, remove at the index
+      };
   }
 
   // Graham scan to find the convex hull of a set of points
