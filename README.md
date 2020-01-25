@@ -29,29 +29,52 @@ This finding further explains the findings of Eckel et al. in their paper "A fra
 
 To compensate for this, several changes are made. In the first place, both the distances between the real source position and speakers ($d_{ir}$), as well as the distances from the projection onto the convex hull and the speakers is calculated ($d_{ip}$):
 
-$$
+<!-- $$
 d_{ir} = \sqrt{(x_{ir} - x_{s})^2 + (y_{ir} - y_{s})^2 + r_{s}^2}
-$$
+$$ -->
+
+<d1>
+<br/>
+<img align="middle" src="https://latex.codecogs.com/png.latex?\dpi{150}&space;d_{ir}&space;=&space;\sqrt{(x_{ir}&space;-&space;x_{s})^2&space;&plus;&space;(y_{ir}&space;-&space;y_{s})^2&space;&plus;&space;r_{s}^2}" title="d_{ir} = \sqrt{(x_{ir} - x_{s})^2 + (y_{ir} - y_{s})^2 + r_{s}^2}" />
+<br/>
+<br/>
+</d1>
 
 where $x_{ir}$ is the $x$ position of the source's real position, and $y_{ir}$ is the $y$ position of the source's real position. And:
 
-$$
+<!-- $$
 d_{ip} = \sqrt{(x_{ip} - x_{s})^2 + (y_{ip} - y_{s})^2 + r_{s}^2}
-$$
+$$ -->
+<d1>
+<br/>
+<img align="middle" src="https://latex.codecogs.com/png.latex?\inline&space;\dpi{150}&space;d_{ip}&space;=&space;\sqrt{(x_{ip}&space;-&space;x_{s})^2&space;&plus;&space;(y_{ip}&space;-&space;y_{s})^2&space;&plus;&space;r_{s}^2}" title="d_{ip} = \sqrt{(x_{ip} - x_{s})^2 + (y_{ip} - y_{s})^2 + r_{s}^2}" />
+<br/>
+<br/>
+</d1>
 
-where $x_{ip}$ is the $x$ position of the source's projected position, and $y_{ip}$ is the $y$ position of the source's projected position. The hack occurs when the projected distance becomes less than 1; at this point, the term $k$ in Lossius skyrockets and causes the entire system to collapse. Instead, $d_{ip}$ is limited to a minimum of 1 to stabilize the algorithm. This causes some spatial distortion but in practice it has not proved terribly problematic and is doubtless better than the alternative of allowing the $k$ term to grow very high.
+where $x_{ip}$ is the $x$ position of the source's projected position, and $y_{ip}$ is the $y$ position of the source's projected position. The hack occurs when the projected distance becomes less than 1; at this point, the term $k$ in Lossius skyrockets and causes the entire system to collapse. Instead, 1 is added to $d_{ip}$ such that the minimum is 1 to stabilize the algorithm. This causes some spatial distortion but in practice it has not proved terribly problematic and is doubtless better than the alternative of allowing the $k$ term to grow very high.
 
 Another term is then introduced to express the ratio between the real distance and the projected distance, $d_{ic}$. For a source inside the convex hull, it is equal to the real distance, $d_{ir}$. If the source is outside the convex hull, it is defined as the square root of the product of the real and projected distances:
 
-$$
+<!-- $$
 d_{ic} = \sqrt{d_{ir} d_{ip}}
-$$
+$$ -->
+<d1>
+<img align="middle" src="https://latex.codecogs.com/gif.latex?\dpi{150}&space;d_{ic}&space;=&space;\sqrt{d_{ir}&space;d_{ip}}" title="d_{ic} = \sqrt{d_{ir} d_{ip}}" />
+<br/>
+<br/>
+</d1>
 
 From there, $d_{ic}$ is substituted for $d_{i}$ in Equation 9 to calculate the gains for each speaker:
 
-$$
+<!-- $$
 v_{i} = \frac{kw_{i}}{d_{ic}^a}
-$$
+$$ -->
+<d1>
+<img align="middle" src="https://latex.codecogs.com/gif.latex?\dpi{150}&space;v_{i}&space;=&space;\frac{kw_{i}}{d_{ic}^a}" title="v_{i} = \frac{kw_{i}}{d_{ic}^a}" />
+<br/>
+<br/>
+</d1>
 
 ### Requirements
 
