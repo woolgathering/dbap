@@ -99,17 +99,20 @@ void DBAP::getDists(bool outsideHull) {
     double xDiff, yDiff;
     xDiff = (double) pow(getX(speakers[i].pos) - getX(realSourcePos), 2);
     yDiff = (double) pow(getY(speakers[i].pos) - getY(realSourcePos), 2);
-    speakers[i].realDist = sqrt(xDiff + yDiff + pow(blur, 2));
+    // speakers[i].realDist = sqrt(xDiff + yDiff + pow(blur, 2));
+    speakers[i].realDist = sqrt(xDiff + yDiff + pow(blur, 2)) + 1;
 
     // if it's outside the hull, also get the distances from the projection for biasing
     // if it's not outside the hull, just use the real distances
     if(outsideHull) {
       xDiff = (double) pow(getX(speakers[i].pos) - getX(projectedSourcePos), 2);
       yDiff = (double) pow(getY(speakers[i].pos) - getY(projectedSourcePos), 2);
-      speakers[i].projectedDist = std::max(sqrt(xDiff + yDiff + pow(blur, 2)), 1.0); // clip it at 1. Hack but it works.
+      // speakers[i].projectedDist = std::max(sqrt(xDiff + yDiff + pow(blur, 2)), 1.0); // clip it at 1. Hack but it works.
+      speakers[i].projectedDist = sqrt(xDiff + yDiff + pow(blur, 2)) + 1; // clip it at 1. Hack but it works.
       sumOfDists += pow(speakers[i].weight, 2) / pow(speakers[i].projectedDist, 2*a);
     } else {
-      sumOfDists += pow(speakers[i].weight, 2) / pow(std::max(speakers[i].realDist, 1.0), 2*a);
+      // sumOfDists += pow(speakers[i].weight, 2) / pow(std::max(speakers[i].realDist, 1.0), 2*a);
+      sumOfDists += pow(speakers[i].weight, 2) / pow(speakers[i].realDist, 2*a);
     }
   }
   sqrtSumOfDists = sqrt(sumOfDists); // only do it when we need to
