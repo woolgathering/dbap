@@ -16,7 +16,8 @@ DBAP : MultiOutUGen {
 
 
 DBAPSpeakerArray {
-  var <positions, <weights, <convexHull, convexHullVerticies, <buff, <buffArray, sources, window;
+  var <positions, <weights, <convexHull, convexHullVerticies, <buff, <buffArray, sources, window, <scale;
+	var chTrans, posTrans;
 
   *new {|positions, weights|
     ^super.newCopyArgs(positions, weights).init;
@@ -32,10 +33,10 @@ DBAPSpeakerArray {
     // otherwise .indexOfEqual() can return nil values! This needs to be mitigated in the future.
     // it may not present a problem since if we use meters, speakers must be no closer than 1cm!
     posRound = positions.round(0.01);
-    convexHull = this.grahamScan2D(posRound); // get the convex hull
+    // convexHull = this.grahamScan2D(posRound); // get the convex hull
+    convexHull = posRound.grahamScan2D; // get the convex hull
     convexHullVerticies = convexHull.collect{|vert| posRound.indexOfEqual(vert.round(0.01))}; // get the speakers that form the hull
     convexHull = convexHullVerticies.collect{|idx| positions[idx]}; // get back our original precision
-
   }
 
   makeBuffer {
@@ -62,15 +63,16 @@ DBAPSpeakerArray {
 
   // a crude (for now) visualizer
   plot {
-    var chTrans, posTrans, sourceTrans;
+    var sourceTrans;
 
     // sloppy but it's only run once ¯\_(ツ)_/¯
     defer {
       window = Window.new.front;
       window.view.background_(Color.white);
+			scale = 1;
 
-      chTrans = convexHull.collect{|vert| this.correctForPlot(vert)};
-      posTrans = positions.collect{|vert| this.correctForPlot(vert)};
+			chTrans = convexHull.collect{|vert| this.correctForPlot(vert)};
+			posTrans = positions.collect{|vert| this.correctForPlot(vert)};
 
       window.drawFunc = {
         // outline the convex hull
@@ -110,17 +112,19 @@ DBAPSpeakerArray {
         Pen.stroke;
 
         // add a label
-        Pen.stringAtPoint("%m x %m".format(window.bounds.width/10, window.bounds.height/10), Point(10,10), Font(size: 12), Color.black);
+        Pen.stringAtPoint("% x %".format((window.bounds.width/10)/scale, (window.bounds.height/10)/scale), Point(10,10), Font(size: 12), Color.black);
       };
+
+			window.view.onResize = this.prOnResize;
       window.refresh;
       ^window;
     };
   }
 
   correctForPlot {|point|
-    point = point*[10,-10];
-    point = point + [window.bounds.width/2, window.bounds.height / 2];
-    ^point.asPoint
+    point = point*([10,-10]*scale);
+    point = point + [window.bounds.width/2, window.bounds.height/2];
+    ^point.asPoint;
   }
 
   addSource {|source|
@@ -145,75 +149,19 @@ DBAPSpeakerArray {
       };
   }
 
-  // Graham scan to find the convex hull of a set of points
-  // can only be used right now in two dimensions
-  grahamScan2D {|speakerPositions|
-    var p0, tmpArray, stack, calcDirection, sortByAngle;
+	// scale the plot
+	scale_ {|val|
+		scale = val;
+		chTrans = convexHull.collect{|vert| this.correctForPlot(vert)};
+		posTrans = positions.collect{|vert| this.correctForPlot(vert)};
+		{window.refresh}.defer;
+	}
 
-    // function to calculate the direction
-    calcDirection = {|vec1, vec2, vec3|
-      ((vec2[0] - vec1[0])*(vec3[1] - vec1[1])) - ((vec2[1] - vec1[1])*(vec3[0] - vec1[0]));
-    };
-    // function to sort by angle and remove points with the same angle
-    sortByAngle = {|array|
-      var angles = [], points = [], combined, dist;
-      dist = {|pointA, pointB| ((pointA[0] - pointB[0]).pow(2) + (pointA[1] - pointB[1]).pow(2)).sqrt};
-      array.do{|p|
-        var ang = atan2(p[1], p[0]), idxOfEqual; // could be made faster by replacing atan2
-        if(angles.includes(ang)) {
-          // there's already a point with the same angle. Find the farthest one.
-          idxOfEqual = angles.indexOf(ang); // get the index of the point with the equal angle
-          if(dist.(p0, p) > dist.(p0, points[idxOfEqual])) {
-            // if this point is further, replace the old one
-            points[idxOfEqual] = p;
-          }; // otherwise keep the old one
-        } {
-          angles = angles.add(ang); // add it
-          points = points.add(p); // add it
-        }
-      };
-
-      // then sort
-      combined = points.collect{|p, i| p ++ angles[i]};
-      combined.sort{|a, b| a[2] < b[2]}; // sort by angle
-      combined.collect{|p| p[..1]}; // keep and return the coordinates only
-    };
-
-    // get P0
-    p0 = {
-      var tmp;
-      tmp = speakerPositions.flop[1]; // get the y values
-      tmp = tmp.indicesOfEqual(tmp.minItem).collect{|i|
-        speakerPositions[i]; // get the right points
-      };
-      if(speakerPositions .size > 1)
-        {tmp[tmp.flop[0].minIndex]} // return the lowest x val
-        {speakerPositions[tmp[0]]}; // return the point
-    }.value;
-
-    // transpose by P0 (makes getting angles easier)
-    tmpArray = speakerPositions.copy; // make a copy so as not to destroy the original
-    tmpArray.remove(p0); // remove P0 from the list
-    tmpArray = tmpArray.collect{|p| p - p0}; // transpose
-
-    // sort by angle and remove points with the same angle
-    tmpArray = sortByAngle.(tmpArray);
-
-    // now we can get the convex hull
-    stack = [[0,0], tmpArray[0], tmpArray[1]]; // a stack with P0 and the first two points of the remainder of the points
-    tmpArray[2..].do{|point|
-      var ang;
-      ang = calcDirection.(stack[stack.size-2], stack.last, point);
-      while ({ang < 0}) {
-        // if ang is less than 0, then the turn is clockwise which is wrong
-        stack.pop; // remove the last point
-        ang = calcDirection.(stack[stack.size-2], stack.last, point); // recalculate
-      };
-      stack = stack.add(point); // add the point when the loop terminates (we turn ccw)
-    };
-
-    ^stack.collect{|p| p+p0}; // transpose back and return the stack
-  }
+	prOnResize {
+		chTrans = convexHull.collect{|vert| this.correctForPlot(vert)};
+		posTrans = positions.collect{|vert| this.correctForPlot(vert)};
+		{window.refresh}.defer;
+	}
 
   /////////////////////////////////////////
   // special getter methods
