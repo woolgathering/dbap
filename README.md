@@ -1,4 +1,4 @@
-# DBAP ![Build Status](https://travis-ci.com/woolgathering/dbap.svg?branch=master) https://ci.appveyor.com/api/projects/status/github/woolgathering/dbap?branch=master&svg=true
+# DBAP ![Build Status](https://travis-ci.com/woolgathering/dbap.svg?branch=master) ![AppVeyor Build](https://ci.appveyor.com/api/projects/status/github/woolgathering/dbap?branch=master&svg=true)
 
 Author: Jacob Sundstrom
 
