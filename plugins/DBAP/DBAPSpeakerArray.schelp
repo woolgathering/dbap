@@ -1,11 +1,12 @@
 TITLE:: DBAPSpeakerArray
-summary:: (put short description here)
-categories:: Undocumented classes
-related:: Classes/SomeRelatedClass, Reference/SomeRelatedStuff, etc.
+summary:: A speaker array for DBAP
+categories:: Spatialization
+related:: Classes/DBAP
 
 DESCRIPTION::
 A class to use with LINK::Classes/DBAP::
 
+Included with the plugin is a class extension for Array which is the Graham scan in two dimensions for the calculation of a convex hull used by DBAPSpeakerArray.
 
 CLASSMETHODS::
 
@@ -31,7 +32,7 @@ Make the buffer that is passed to the DBAP UGen.
 returns:: A DBAPSpeakerArray
 
 METHOD:: weights
-Return the weights of the speakers. Cannot currently be changed.
+Return the weights of the speakers. Cannot currently be changed after initialization.
 
 METHOD:: buff
 The buffer that is passed to the DBAP UGen.
@@ -45,8 +46,10 @@ Free the buffer.
 SUBSECTION::Plotting
 There are various functionalities to plot the field and sources to ease visualization.
 
+IMAGE::convexHull.png#Eight randomly arranged speakers in a plot::
+
 METHOD:: plot
-Plot the speakers, sources, and outline the convex hull. Speakers are plotted as empty blue circles, the sources as filled in green circles, and the convex hull as red lines. The default size (currenlty cannot modify) of the canvas is 40mx40m. Each speaker and source is labeled.
+Plot the speakers, sources, and outline the convex hull. Speakers are plotted as empty blue circles, the sources as filled in green circles, and the convex hull as red lines. The default size of the canvas is 40x40. Each speaker and source is labeled.
 
 METHOD:: addSource
 Add a source that will be plotted.
@@ -63,66 +66,53 @@ The new location in a two-element array.
 
 METHOD::removeSource
 Remove a source at the specified index. If nil, remove the last source.
+NOTE::Removing a source that is not the last in the list will cause the rest of the sources to be relabeled accordingly.::
 ARGUMENT::idx
 Which source to remove from the plot.
-NOTE::Removing a source that is not the last in the list will cause the rest of the sources to be relabeled accordingly.::
 
+METHOD::scale
+Scale the plot. Values >1 cause a zoom-in; values <1 cause a "zoom-out".
 
-
-
-
-
-
-METHOD:: buffArray
-(describe method here)
-
-returns:: (describe returnvalue here)
-
-
-
-
-METHOD:: correctForPlot
-(describe method here)
-
-ARGUMENT:: point
-(describe argument here)
-
-returns:: (describe returnvalue here)
-
-
-
-METHOD:: sources
-(describe method here)
-
-returns:: (describe returnvalue here)
-
-METHOD:: convexHull
-(describe method here)
-
-returns:: (describe returnvalue here)
-
-
-METHOD:: positions
-(describe method here)
-
-returns:: (describe returnvalue here)
-
-METHOD:: grahamScan2D
-(describe method here)
-
-ARGUMENT:: speakerPositions
-(describe argument here)
-
-returns:: (describe returnvalue here)
-
-METHOD:: init
-(describe method here)
-
-returns:: (describe returnvalue here)
+METHOD::convexHull
+Returns the points as an Array that make up the convex hull, starting with vertex with the lowest y-value
 
 
 EXAMPLES::
 
 code::
-(some example code)
+s.options.numOutputBusChannels = 4;
+
+SynthDef(\dbap_4, {|sourceX = 0, sourceY = 0, buf, rolloff = 0, blur = 0|
+	var sig;
+	sig = DBAP.ar(4, SinOsc.ar(880)*0.5, buf, sourceX.lag2, sourceY.lag2, rolloff, blur);
+	Out.ar(0, sig);
+}).add;
+
+// make a DBAP SpeakerArray in four corners of a square with weights of 1
+d = DBAPSpeakerArray([[-4, 4], [4,4], [4,-4], [-4, -4]], [1,1,1,1]).makeBuffer;
+
+z = Synth(\dbap_4, [sourceX: 0, sourceY: 0, buf: d.buff, rolloff: 12, blur: 0.1]);
+
+d.addSource([0,0]); // add a source at [0,0]
+d.plot; // plot it
+
+// now do a routine and move the source
+~mag = 10; // raddius
+~angfreq = 2pi/50; // radians per timestep
+r = fork {
+  var mag, magPattern, angle, x, y, point;
+	angle = 0;
+  loop {
+	  angle = angle + ~angfreq; // get the new angle
+	  point = Polar(~mag, angle).asPoint; // convert from Polar to Cartesian
+    d.modifySource(0, [point.x,point.y]); // modify the source in the plot
+    s.makeBundle(nil, {
+      z.set(\sourceX, point.x);
+      z.set(\sourceY, point.y);
+    });
+    0.5.wait;
+  }
+};
+
+r.stop;
 ::

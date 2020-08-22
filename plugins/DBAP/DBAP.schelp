@@ -1,10 +1,12 @@
 class:: DBAP
 summary:: Distance-based ampltide panning
 related:: Classes/DBAPSpeakerArray
-categories:: UGens>
+categories:: UGens
 
 DESCRIPTION::
 An implementation of the DBAP algorithm by Trond Lossius in two dimensions with some (somewhat) significant changes. Read about it on the repo: https://github.com/woolgathering/dbap.
+
+NOTE::This implementation is strong::unitless:: such that no delay between speakers is calculated and only gains, according to the rolloff, are calculalted. This solves some issues with spatial distortion when sources get close to speakers.::
 
 CLASSMETHODS::
 
@@ -24,7 +26,7 @@ The rolloff for distance in dB. Note that this value is positive!
 ARGUMENT:: blur
 The spatial blur
 
-PRIVATE:: checkInputs, init::
+PRIVATE:: checkInputs, init
 
 EXAMPLES::
 
