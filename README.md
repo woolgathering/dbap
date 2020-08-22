@@ -1,16 +1,16 @@
-# DBAP [![Build Status](https://travis-ci.com/woolgathering/dbap.svg?branch=master)](https://travis-ci.com/woolgathering/dbap)
+# DBAP
 
 Author: Jacob Sundstrom
 
-__This is pre-alpha and should NOT be deployed in the field!__ It is in a highly experimental stage.
+Distance-based ampltide panning (DBAP). Based on the [paper](https://pdfs.semanticscholar.org/132a/028b9febadd03f2c75e5f79ca500c2dd04fd.pdf?_ga=2.103137216.1512247688.1571200723-789701753.1569525663) by Trond Lossius, Pascal Baltazar, and Théo de la Hogue with some significant changes described below.
 
-Distance-based ampltide panning (DBAP). Based on the [paper](https://pdfs.semanticscholar.org/132a/028b9febadd03f2c75e5f79ca500c2dd04fd.pdf?_ga=2.103137216.1512247688.1571200723-789701753.1569525663) by Trond Lossius, Pascal Baltazar, and Théo de la Hogue with some significant changed described below.
+_There are bound to be some bugs lying dormant and the algorithm itself could use some serious tweaking as it requires some serious optimization for a given set up. As written, though, it is a faithful implementation of the original algorithm with the exceptions outlined below._
 
 ### Changes
 
 This version differs from the version of DBAP put forward by Lossius et al. primarily in the way the gains are calculated for sources outside the "convex hull". In Lossius 2.6, the issue of sources outside the field of speakers is presented. As a source moves further and further away, the difference between the gains for each speaker is reduced, thus causing the source to lose its perceived spatial properties. To counteract this, Lossius suggests _projecting_ the source that is outside the field onto the _convex hull_ of the loudspeaker field and to use this projected point in subsequent calculations of gain. Doing so would likewise give the distance from the source to the speaker field and thus allow the amplitudes to be scaled as a function of the distance from the hull. The projection provides sufficient biasing of the gains to maintain the spatial illusion.
 
-In cases where the projection is orthogonal to the perimeter of the convex hull, this works adequately. However, when a projection is _not_ orthogonal, as in the case of the area beyond the vertices of the convex hull where the projection is one of the vertices, this method fails to provide a unique solution. In particular, all spatial differentiation is lost when different sources share the same projection onto one of the vertices. This is the case for all points in the shaded areas below.
+In cases where the projection is orthogonal to the perimeter of the convex hull, this works adequately. However, when a projection is _not_ orthogonal, as in the case of the area beyond the vertices of the convex hull where the projection is one of the vertices, this method fails to provide a unique solution. In particular, all spatial differentiation is lost when different sources share the same projection onto the same vertex. This is the case for all points in the shaded areas below.
 
 ![shaded](images/Figure_3.png)
 
@@ -27,7 +27,7 @@ This finding further explains the findings of Eckel et al. in their paper "A fra
 
 #### One Solution
 
-To compensate for this, several changes are made. In the first place, both the distances between the real source position and speakers ($d_{ir}$), as well as the distances from the projection onto the convex hull and the speakers is calculated ($d_{ip}$):
+To compensate for this, several changes are made. In the first place, both the distances between the real source position and speakers ($d_{ir}$), as well as the distances from the projection onto the convex hull and the speakers are calculated ($d_{ip}$):
 
 <!-- $$
 d_{ir} = \sqrt{(x_{ir} - x_{s})^2 + (y_{ir} - y_{s})^2 + r_{s}^2}
@@ -52,7 +52,7 @@ $$ -->
 <br/>
 </d1>
 
-where $x_{ip}$ is the $x$ position of the source's projected position, and $y_{ip}$ is the $y$ position of the source's projected position. The hack occurs when the projected distance becomes less than 1; at this point, the term $k$ in Lossius skyrockets and causes the entire system to collapse. Instead, 1 is added to $d_{ip}$ such that the minimum is 1 to stabilize the algorithm. This causes some spatial distortion but in practice it has not proved terribly problematic and is doubtless better than the alternative of allowing the $k$ term to grow very high.
+where $x_{ip}$ is the $x$ position of the source's projected position, and $y_{ip}$ is the $y$ position of the source's projected position. A hack occurs when the projected distance becomes less than 1; at this point, the term $k$ as defined in Lossius skyrockets and causes the entire system to collapse. Instead, a value of 1 is added to both distances such that the minimum possible distance is bounded at 1 to stabilize the algorithm. This causes some spatial distortion but in practice it has not proved problematic and is doubtless better than the alternative of allowing the $k$ term to grow very high.
 
 Another term is then introduced to express the ratio between the real distance and the projected distance, $d_{ic}$. For a source inside the convex hull, it is equal to the real distance, $d_{ir}$. If the source is outside the convex hull, it is defined as the square root of the product of the real and projected distances:
 
@@ -60,6 +60,7 @@ Another term is then introduced to express the ratio between the real distance a
 d_{ic} = \sqrt{d_{ir} d_{ip}}
 $$ -->
 <d1>
+<br/>
 <img align="middle" src="https://latex.codecogs.com/gif.latex?\dpi{150}&space;d_{ic}&space;=&space;\sqrt{d_{ir}&space;d_{ip}}" title="d_{ic} = \sqrt{d_{ir} d_{ip}}" />
 <br/>
 <br/>
@@ -71,10 +72,13 @@ From there, $d_{ic}$ is substituted for $d_{i}$ in Equation 9 to calculate the g
 v_{i} = \frac{kw_{i}}{d_{ic}^a}
 $$ -->
 <d1>
+<br/>
 <img align="middle" src="https://latex.codecogs.com/gif.latex?\dpi{150}&space;v_{i}&space;=&space;\frac{kw_{i}}{d_{ic}^a}" title="v_{i} = \frac{kw_{i}}{d_{ic}^a}" />
 <br/>
 <br/>
 </d1>
+
+This approach has so far proved sufficient but further testing on more complex speaker arrays is needed to verify its robustness.
 
 ### Requirements
 
@@ -83,20 +87,6 @@ $$ -->
 - Boost Geometry >= 1.65.1.0
 
 ### Building
-
-#### Installing Boost
-
-DBAP uses Boost geometry to make some of the calculations easier to deal with. It may be removed in future versions.
-
-Ubuntu/Debian:
-
-    sudo apt-get install libboost-dev
-
-macOS with Homebrew:
-
-    brew install boost
-
-#### Compiling
 
 Clone the project:
 
