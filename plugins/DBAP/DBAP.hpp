@@ -10,7 +10,6 @@
 
 #define MAX_SPEAKERS 50
 #define R_20LOG 0.16609640474 // reciprocal of (20*log10(2))
-#define DEBUG
 
 // #define DefineSimpleCantAliasUnit(name) (*ft->fDefineUnit)(#name, sizeof(name), (UnitCtorFunc)&name##, 0, kUnitDef_CantAliasInputsToOutputs);
 

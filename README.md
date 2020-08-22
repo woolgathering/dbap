@@ -1,4 +1,4 @@
-# DBAP
+# DBAP [![Build Status](https://travis-ci.com/woolgathering/dbap.svg?branch=master)]
 
 Author: Jacob Sundstrom
 
