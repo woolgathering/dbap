@@ -40,11 +40,11 @@ artifacts:
 - path: build\_install
   name: dbap-windows-$(ARCH)-$(APPVEYOR_REPO_TAG_NAME)
 
-# deploy:
-# - provider: GitHub
-#   description: Distance-based ampltide panning - Release $(APPVEYOR_REPO_TAG_NAME)
-#   artifact: dbap-windows-$(ARCH)-$(APPVEYOR_REPO_TAG_NAME)
-#   auth_token:
-#       secure: YOUR_TOKEN_HERE
-#   on:
-#       appveyor_repo_tag: true
+deploy:
+- provider: GitHub
+  description: Distance-based ampltide panning - Release $(APPVEYOR_REPO_TAG_NAME)
+  artifact: dbap-windows-$(ARCH)-$(APPVEYOR_REPO_TAG_NAME)
+  auth_token:
+      secure: GgvqPkrj0D+A4a7NqwgHwcyQM6BS056+sLDvg1n+0/Yq5/m6gZzL0NZllunnE5WN
+  on:
+      appveyor_repo_tag: true
