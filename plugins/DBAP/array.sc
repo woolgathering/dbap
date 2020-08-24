@@ -1,18 +1,16 @@
 + Array {
 
-	// Graham scan to find the convex hull of a set of points
+  // Graham scan to find the convex hull of a set of points
   // can only be used right now in two dimensions
   grahamScan2D {
     var p0, stack, calcDirection, sortByAngle, positions;
 
-		// also works on arrays of points (only in x,y dimensions)
-		if(this[0].isKindOf(Point) {
-			positions = this.collect{|p|
-				[p.x, p.y];
-			};
-		} {
-			positions = this;
-		});
+  // also works on arrays of points (only in x,y dimensions)
+  if(this[0].isKindOf(Point) {
+    positions = this.collect{|p| [p.x, p.y]};
+  } {
+    positions = this;
+  });
 
     // function to calculate the direction
     calcDirection = {|vec1, vec2, vec3|
