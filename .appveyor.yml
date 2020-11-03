@@ -9,8 +9,9 @@ test: off
 
 environment:
     CMAKE_CONFIGURATION: Release
-    BOOST_ROOT: C:\Libraries\boost_1_66_0
-    BOOST_LIBRARYDIR: C:\Libraries\boost_1_66_0\lib64-msvc-14.1
+    BOOST_ROOT: C:\Libraries\boost_1_58_0
+    BOOST_INCLUDEDIR: C:\Libraries\boost_1_66_0
+    BOOST_LIBRARYDIR: C:\Libraries\boost_1_66_0\lib64-msvc-14.0
     PATH: "%BOOST_LIBRARYDIR%;%PATH%"
 
     matrix:

@@ -6,11 +6,11 @@
     var p0, stack, calcDirection, sortByAngle, positions;
 
   // also works on arrays of points (only in x,y dimensions)
-  if(this[0].isKindOf(Point) {
+  if(this[0].isKindOf(Point)) {
     positions = this.collect{|p| [p.x, p.y]};
   } {
     positions = this;
-  });
+  };
 
     // function to calculate the direction
     calcDirection = {|vec1, vec2, vec3|
@@ -32,7 +32,7 @@
         } {
           angles = angles.add(ang); // add it
           points = points.add(p); // add it
-        }
+
       };
 
       // then sort

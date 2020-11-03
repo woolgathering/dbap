@@ -43,7 +43,7 @@ $$ -->
 where $x_{ir}$ is the $x$ position of the source's real position, and $y_{ir}$ is the $y$ position of the source's real position. And:
 
 <!-- $$
-d_{ip} = \sqrt{(x_{ip} - x_{s})^2 + (y_{ip} - y_{s})^2 + r_{s}^2}
+
 $$ -->
 <d1>
 <br/>
