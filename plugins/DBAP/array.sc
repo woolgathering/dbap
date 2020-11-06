@@ -3,14 +3,7 @@
   // Graham scan to find the convex hull of a set of points
   // can only be used right now in two dimensions
   grahamScan2D {
-    var p0, stack, calcDirection, sortByAngle, positions;
-
-  // also works on arrays of points (only in x,y dimensions)
-  if(this[0].isKindOf(Point)) {
-    positions = this.collect{|p| [p.x, p.y]};
-  } {
-    positions = this;
-  };
+    var p0, tmpArray, stack, calcDirection, sortByAngle;
 
     // function to calculate the direction
     calcDirection = {|vec1, vec2, vec3|
@@ -32,7 +25,7 @@
         } {
           angles = angles.add(ang); // add it
           points = points.add(p); // add it
-
+        }
       };
 
       // then sort
@@ -44,25 +37,26 @@
     // get P0
     p0 = {
       var tmp;
-      tmp = positions.flop[1]; // get the y values
+      tmp = this.flop[1]; // get the y values
       tmp = tmp.indicesOfEqual(tmp.minItem).collect{|i|
-        positions[i]; // get the right points
+        this[i]; // get the right points
       };
-      if(positions .size > 1)
+      if(this .size > 1)
         {tmp[tmp.flop[0].minIndex]} // return the lowest x val
-        {positions[tmp[0]]}; // return the point
+        {this[tmp[0]]}; // return the point
     }.value;
 
     // transpose by P0 (makes getting angles easier)
-    positions.remove(p0); // remove P0 from the list
-    positions = positions.collect{|p| p - p0}; // transpose
+    tmpArray = this.copy; // make a copy so as not to destroy the original
+    tmpArray.remove(p0); // remove P0 from the list
+    tmpArray = tmpArray.collect{|p| p - p0}; // transpose
 
     // sort by angle and remove points with the same angle
-    positions = sortByAngle.(positions);
+    tmpArray = sortByAngle.(tmpArray);
 
     // now we can get the convex hull
-    stack = [[0,0], positions[0], positions[1]]; // a stack with P0 and the first two points of the remainder of the points
-    positions[2..].do{|point|
+    stack = [[0,0], tmpArray[0], tmpArray[1]]; // a stack with P0 and the first two points of the remainder of the points
+    tmpArray[2..].do{|point|
       var ang;
       ang = calcDirection.(stack[stack.size-2], stack.last, point);
       while ({ang < 0}) {
