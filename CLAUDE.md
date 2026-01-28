@@ -138,7 +138,16 @@ r_s = (Σ d_ic / N) * r_scalar
 
 ### Implementation Roadmap
 
-To align the code with the paper:
+**KEY SIMPLIFICATION: The `p` method eliminates convex hull calculation entirely.**
+
+The current implementation uses convex hull detection + projection + geometric mean as a workaround for sources outside the speaker field. The paper's `p` variable approach replaces ALL of this with a simple ratio calculation:
+
+- **No more convex hull** - No Graham Scan, no `boost::geometry::within()`, no projection
+- **Simpler code** - Replace ~100 lines of hull code with ~10 lines for `p`
+- **Works in 3D** - No complex 3D convex hull algorithms needed
+- **Better results** - Smoother power transitions, no vertex artifacts
+
+**Steps to implement:**
 
 1. **Add centroid calculation** in constructor or `DBAPSpeakerArray`
 2. **Add member variables**: `centroid`, `maxSpeakerDist`, `p`
@@ -146,7 +155,7 @@ To align the code with the paper:
 4. **Modify `calcK()`**: Include `p^(2a)` in numerator
 5. **Implement `calcBias()`**: Calculate `b_i` for each speaker
 6. **Modify `getDists()`**: Include biasing in sum calculation
-7. **Optionally remove convex hull code**: The `p` method eliminates this need
+7. **Remove convex hull code**: Delete hull structs, projection methods, Graham Scan
 
 ### Key Code Locations for Modifications
 
@@ -158,13 +167,18 @@ To align the code with the paper:
 
 ### Code to Remove (No Longer Needed)
 
-With the `p` method, convex hull calculation is eliminated:
+**The `p` method makes all convex hull code obsolete.** Remove:
 
-- **array.sc**: Graham Scan algorithm (or make optional for visualization)
-- **DBAP.hpp:35-40**: `convexHullStruct` struct
-- **DBAP.hpp:46-47**: `convexHull`, `nearestSegment` members
-- **DBAP.cpp**: `insideConvexHull()`, `getNearestPoint()`, `projectPoint()` methods
-- **DBAP.sc**: Convex hull buffer creation in `makeBuffer()`
+| File | What to Remove | Why |
+|------|----------------|-----|
+| **array.sc** | `grahamScan2D` method | Hull no longer calculated |
+| **DBAP.hpp** | `convexHullStruct` (lines 35-40) | No hull storage needed |
+| **DBAP.hpp** | `convexHull`, `nearestSegment` members | No hull tracking |
+| **DBAP.hpp** | `insideConvexHull()`, `getNearestPoint()`, `projectPoint()` declarations | Replaced by `p` |
+| **DBAP.cpp** | All projection/hull methods (~50 lines) | Replaced by `calcP()` |
+| **DBAP.sc** | Convex hull buffer creation in `makeBuffer()` | Centroid only needed |
+
+**Note:** Keep `array.sc` if you want visualization of the hull, but it's no longer needed for the algorithm.
 
 ## Future Enhancements
 
