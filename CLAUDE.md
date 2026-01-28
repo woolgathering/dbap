@@ -156,6 +156,28 @@ To align the code with the paper:
 - **DBAP.cpp:95-118**: Modify `getDists()` to calculate `p` and biasing
 - **DBAP.cpp:121-128**: Modify `calcGain()` to use new method
 
+### Code to Remove (No Longer Needed)
+
+With the `p` method, convex hull calculation is eliminated:
+
+- **array.sc**: Graham Scan algorithm (or make optional for visualization)
+- **DBAP.hpp:35-40**: `convexHullStruct` struct
+- **DBAP.hpp:46-47**: `convexHull`, `nearestSegment` members
+- **DBAP.cpp**: `insideConvexHull()`, `getNearestPoint()`, `projectPoint()` methods
+- **DBAP.sc**: Convex hull buffer creation in `makeBuffer()`
+
+## Future Enhancements
+
+### Variable Reference Point
+
+The reference point used in `p` calculation is typically the field centroid, but the paper notes it can be modulated. Potential use cases:
+
+- **Listener tracking**: Reference follows a listener moving through the field
+- **Dynamic focus**: Shift the "center" of the spatial field in real-time
+- **Asymmetric layouts**: Use a point other than geometric centroid
+
+Implementation would add a `referencePoint` parameter (defaulting to centroid) that can be updated at control rate.
+
 ## Build Instructions
 
 ### Requirements
