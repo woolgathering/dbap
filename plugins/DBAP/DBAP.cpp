@@ -42,6 +42,26 @@ DBAP::DBAP() {
     double y = buf->data[idx++];
     speakers[i].pos = point(x, y); // (buf->data[idx++], buf->data[idx++]) results in a reversed array??
   }
+
+  // calculate centroid (geometric center of speaker array)
+  double centroidX = 0.0, centroidY = 0.0;
+  for(int i=0; i<numSpeakers; i++) {
+    centroidX += getX(speakers[i].pos);
+    centroidY += getY(speakers[i].pos);
+  }
+  centroidX /= numSpeakers;
+  centroidY /= numSpeakers;
+  centroid = point(centroidX, centroidY);
+
+  // calculate maxSpeakerDist (distance from centroid to farthest speaker)
+  maxSpeakerDist = 0.0;
+  for(int i=0; i<numSpeakers; i++) {
+    double dist = bg::distance(centroid, speakers[i].pos);
+    if(dist > maxSpeakerDist) {
+      maxSpeakerDist = dist;
+    }
+  }
+
   // get the weights
   for(int i=0; i<numSpeakers; i++) {
     speakers[i].weight = buf->data[idx++];

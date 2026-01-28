@@ -80,6 +80,10 @@ private:
     float m_fbufnum;
     SndBuf* m_buf;
 
+    // Paper implementation: centroid-based calculations
+    point centroid;           // geometric center of speaker array
+    double maxSpeakerDist;    // distance from centroid to farthest speaker
+
 };
 
 } // namespace DBAP
