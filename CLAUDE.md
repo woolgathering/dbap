@@ -218,7 +218,8 @@ master (stable)
 | 3 | `feature/use-p-in-k` | Modify `calcK()` to use `p^(2a)` | Medium |
 | 4 | `feature/add-biasing` | Implement `b_i` for far sources | Medium |
 | 5 | `feature/remove-convex-hull` | Remove hull code after new method verified | High |
-| 6 | `feature/variable-reference` | Make reference point configurable | Low |
+| 6 | `feature/remove-boost` | Replace Boost Geometry with simple Point struct | Medium |
+| 7 | `feature/variable-reference` | Make reference point configurable | Low |
 
 ### Testing Checklist
 
