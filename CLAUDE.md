@@ -180,6 +180,56 @@ The current implementation uses convex hull detection + projection + geometric m
 
 **Note:** Keep `array.sc` if you want visualization of the hull, but it's no longer needed for the algorithm.
 
+## Development Strategy for Paper Implementation
+
+**IMPORTANT: This is a published plugin with users. Changes must be careful and incremental.**
+
+### Branch Strategy
+
+```
+master (stable)
+  └── dev/paper-implementation (integration branch)
+        ├── feature/add-centroid
+        ├── feature/implement-p-variable
+        ├── feature/implement-biasing
+        ├── feature/remove-convex-hull
+        └── ...
+```
+
+### Workflow
+
+1. **Create `dev/paper-implementation` branch** from master
+2. **For each change**, create a small feature branch:
+   - Make minimal, focused changes
+   - Test compilation on all platforms (or at least locally)
+   - Merge to `dev/paper-implementation`
+3. **Testing phases**:
+   - Unit: Verify compilation
+   - Integration: Test in SuperCollider with example patches
+   - Regression: Ensure existing functionality still works
+4. **When stable**, merge `dev/paper-implementation` to master and tag release
+
+### Suggested Implementation Order
+
+| PR | Branch | Description | Risk |
+|----|--------|-------------|------|
+| 1 | `feature/add-centroid` | Add centroid calculation, no behavior change | Low |
+| 2 | `feature/add-p-variable` | Add `p` calculation alongside existing code | Low |
+| 3 | `feature/use-p-in-k` | Modify `calcK()` to use `p^(2a)` | Medium |
+| 4 | `feature/add-biasing` | Implement `b_i` for far sources | Medium |
+| 5 | `feature/remove-convex-hull` | Remove hull code after new method verified | High |
+| 6 | `feature/variable-reference` | Make reference point configurable | Low |
+
+### Testing Checklist
+
+For each change, verify:
+- [ ] Compiles on Linux
+- [ ] Compiles on macOS
+- [ ] Compiles on Windows (AppVeyor)
+- [ ] Basic SuperCollider test passes (source inside field)
+- [ ] Source outside field behaves correctly
+- [ ] No audio artifacts or discontinuities
+
 ## Future Enhancements
 
 ### Variable Reference Point
